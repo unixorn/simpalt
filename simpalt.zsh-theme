@@ -18,7 +18,6 @@ typeset -aHg SIMPALT_PROMPT_SEGMENTS=(
     prompt_virtualenv
     prompt_dir_small
     prompt_git_small
-    prompt_end
 )
 
 ### Segment drawing
@@ -195,6 +194,7 @@ prompt_simpalt_main() {
   for prompt_segment in "${SIMPALT_PROMPT_SEGMENTS[@]}"; do
     [[ -n $prompt_segment ]] && $prompt_segment
   done
+  prompt_end
 }
 
 prompt_simpalt_precmd() {
