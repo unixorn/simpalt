@@ -100,7 +100,7 @@ prompt_git() {
         prompt_segment red default "" stick
       else
         if [[ "${ref}" != "master" ]]; then
-          [[ "${PADDED}" != "TRUE" ]] && print -n " "
+          [[ "${PADDED}" == "TRUE" ]] && print -n " "
           print -n "$BRANCH"
         fi
 
