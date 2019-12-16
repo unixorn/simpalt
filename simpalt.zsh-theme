@@ -41,17 +41,31 @@ GEAR="\u2699"
 # rendering default background/foreground.
 prompt_segment() {
   local bg fg
+
   [[ -n $1 ]] && bg="%K{$1}" || bg="%k"
   [[ -n $2 ]] && fg="%F{$2}" || fg="%f"
-  if [[ $CURRENT_BG != 'NONE' && $1 != $CURRENT_BG ]]; then
-    print -n "%{$bg%F{$CURRENT_BG}%}$SEGMENT_SEPARATOR%{$fg%}"
-  else
-    print -n '\b'
+
+  if [[ $CURRENT_BG == 'NONE' ]]; then
     print -n "%{$bg%}%{$fg%}"
+  else
+    if [[ $1 != $CURRENT_BG ]]; then
+      print -n "%{$bg%F{$CURRENT_BG}%}$SEGMENT_SEPARATOR%{$fg%}"
+    else
+      if [[ -z $PENDING_FLAG ]]; then
+        print -n '\b'
+      else
+        print -n ' '
+      fi
+    fi
   fi
+
   CURRENT_BG=$1
+
   if [[ -n $3 ]]; then
     print -n " $3 "
+    unset PENDING_FLAG
+  else
+    PENDING_FLAG=1
   fi
 }
 
