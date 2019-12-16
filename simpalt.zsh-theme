@@ -52,7 +52,7 @@ prompt_segment() {
   fi
   CURRENT_BG=$1
   if [[ -n $3 ]];then
-    if [[ "${4}" == "pad" ]]; then
+    if [[ "${4}" != "stick" ]]; then
       print -n " "
       PADDED='TRUE'
     else
@@ -83,7 +83,7 @@ prompt_context() {
 
   if [[ "$user" != "$DEFAULT_USER" || -n "$SSH_CONNECTION" ]]; then
     [[ -n "${COMPUTER_SYMBOL}" ]] && context="${COMPUTER_SYMBOL}" || context="$user@%m"
-    prompt_segment $PRIMARY_FG default "%(!.%{%F{yellow}%}.)$context" pad
+    prompt_segment $PRIMARY_FG default "%(!.%{%F{yellow}%}.)$context"
   fi
 }
 
@@ -95,8 +95,10 @@ prompt_git() {
   }
   ref="$vcs_info_msg_0_"
 
+  local padding='stick'
+
   if [ $SIMPALT_SMALL ]; then
-    if [[ $ref ]]; then
+    if [ -z "$ref" ]; then
       color=blue
     else
       if ! $(git symbolic-ref HEAD &> /dev/null); then
@@ -110,12 +112,11 @@ prompt_git() {
       if [[ "${ref}" == "master" ]] || [[ "${ref}" == "develop" ]] || [[ "${ref}" == "development" ]]; then
         ref=""
       else
-        ref=" ${ref/*\//} "
+        ref="${ref/*\//}"
+        unset padding
       fi
     fi
-
-    prompt_segment "${color}" $PRIMARY_FG "$ref"
-    PADDED='FALSE'
+    prompt_segment "${color}" $PRIMARY_FG "$ref" $padding
   else
     if [[ -n "$ref" ]]; then
       if is_dirty; then
@@ -123,16 +124,14 @@ prompt_git() {
         ref="${ref} $PLUSMINUS"
       else
         color=green
-        ref="${ref} "
+        ref="${ref}"
       fi
       if [[ "${ref/.../}" == "$ref" ]]; then
         ref="$BRANCH $ref"
       else
         ref="$DETACHED ${ref/.../}"
       fi
-      prompt_segment $color $PRIMARY_FG
-      print -n " ${ref}"
-      PADDED='TRUE'
+      prompt_segment $color $PRIMARY_FG "${ref}"
     fi
   fi
 }
@@ -140,7 +139,7 @@ prompt_git() {
 # AWS: current aws-vault session
 prompt_aws() {
   if [ $AWS_VAULT ]; then
-    [ $SIMPALT_SMALL ] && prompt_segment black default "%{%F{magenta}%}" pad || prompt_segment magenta $PRIMARY_FG " $AWS_VAULT" pad
+    [ $SIMPALT_SMALL ] && prompt_segment black default "%{%F{magenta}%}" || prompt_segment magenta $PRIMARY_FG " $AWS_VAULT"
   fi
 }
 
@@ -148,12 +147,12 @@ prompt_aws() {
 prompt_dir() {
   if [ $SIMPALT_SMALL ]; then
     if [[ "$PWD" == "$HOME" ]]; then
-      prompt_segment black default '~' pad
+      prompt_segment black default '~'
     else
-      prompt_segment black default "$(basename $PWD)" pad
+      prompt_segment black default "$(basename $PWD)"
     fi
   else
-    prompt_segment blue $PRIMARY_FG '%~' pad
+    prompt_segment blue $PRIMARY_FG '%~'
   fi
 }
 
@@ -168,16 +167,14 @@ prompt_status() {
   [[ $UID -eq 0 ]] && symbols+="%{%F{yellow}%}$LIGHTNING"
   [[ $(jobs -l | wc -l) -gt 0 ]] && symbols+="%{%F{cyan}%}$GEAR"
 
-  [[ -n "$symbols" ]] && prompt_segment $PRIMARY_FG default "$symbols" pad
+  [[ -n "$symbols" ]] && prompt_segment $PRIMARY_FG default "$symbols"
 }
 
 # Display current virtual environment
 prompt_virtualenv() {
   if [[ -n $VIRTUAL_ENV ]]; then
     color=cyan
-    prompt_segment $color $PRIMARY_FG
-    print -Pn " $(basename $VIRTUAL_ENV)"
-    PADDED='TRUE'
+    prompt_segment $color $PRIMARY_FG "$(basename $VIRTUAL_ENV)"
   fi
 }
 
