@@ -31,6 +31,7 @@ fi
 
 # Characters
 SEGMENT_SEPARATOR="\ue0b0"
+FLAG_SEPARATOR="\ue0b1"
 PLUSMINUS="\u00b1"
 BRANCH="\ue0a0"
 DETACHED="\u27a6"
@@ -56,7 +57,7 @@ prompt_segment() {
       if [[ -z $PENDING_FLAG ]]; then
         print -n '\b'
       else
-        print -n ' '
+        print -n "%F{%k%}$FLAG_SEPARATOR"
       fi
     fi
   fi
