@@ -107,10 +107,8 @@ prompt_git() {
         color=green
       fi
 
-      if [[ "${ref}" == "master" ]]; then
+      if [[ "${ref}" == "master" ]] || [[ "${ref}" == "develop" ]] || [[ "${ref}" == "development" ]]; then
         ref=""
-      elif [[ "${ref}" == "develop" ]] || [[ "${ref}" == "development" ]]; then
-        ref=" $BRANCH "
       else
         ref=" ${ref/*\//} "
       fi
