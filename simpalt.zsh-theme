@@ -89,35 +89,37 @@ prompt_context() {
 
 # Git: branch/detached head, dirty status
 prompt_git() {
-  if [ $SIMPALT_SMALL ]; then
-    local ref
-    is_dirty() {
-      test -n "$(git status --porcelain --ignore-submodules)"
-    }
-    ref="$vcs_info_msg_0_"
-    if [[ -n "$ref" ]]; then
-      if [[ "${ref/.../}" != "$ref" ]]; then
-        prompt_segment red default "" stick
-      else
-        if [[ "${ref}" != "master" ]]; then
-          prompt_segment $PRIMARY_FG default "$BRANCH" pad
-        fi
+  local ref color
+  is_dirty() {
+    test -n "$(git status --porcelain --ignore-submodules)"
+  }
+  ref="$vcs_info_msg_0_"
 
-        if is_dirty; then
-          prompt_segment yellow default "" stick
-        else
-          prompt_segment green default "" stick
-        fi
+  if [ $SIMPALT_SMALL ]; then
+    if [[ -n "$ref" ]]; then
+      if ! $(git symbolic-ref HEAD &> /dev/null); then
+        color=red
+      elif is_dirty; then
+        color=yellow
+      else
+        color=green
+      fi
+
+      if [[ "${ref}" == "master" ]]; then
+        prompt_segment $PRIMARY_FG default "" pad
+        prompt_segment "${color}" default "" stick
+      elif [[ "${ref}" == "develop" ]] || [[ "${ref}" == "development" ]]; then
+        prompt_segment $PRIMARY_FG default "$BRANCH" pad
+        prompt_segment "${color}" default "" stick
+      else
+        prompt_segment "${color}" $PRIMARY_FG
+        print -n " ${ref/*\//}"
+        PADDED='TRUE'
       fi
     else
       prompt_segment blue default "" stick
     fi
   else
-    local color ref
-    is_dirty() {
-      test -n "$(git status --porcelain --ignore-submodules)"
-    }
-    ref="$vcs_info_msg_0_"
     if [[ -n "$ref" ]]; then
       if is_dirty; then
         color=yellow
