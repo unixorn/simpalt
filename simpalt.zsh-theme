@@ -11,14 +11,16 @@
 ### Segment drawing
 # A few utility functions to make it easy and re-usable to draw segmented prompts
 
-typeset -aHg SIMPALT_PROMPT_SEGMENTS=(
-    prompt_aws
-    prompt_status
-    prompt_context
-    prompt_virtualenv
-    prompt_dir
-    prompt_git
-)
+if [[ -z $SIMPALT_PROMPT_SEGMENTS ]]; then
+  typeset -aHg SIMPALT_PROMPT_SEGMENTS=(
+      prompt_aws
+      prompt_status
+      prompt_context
+      prompt_virtualenv
+      prompt_dir
+      prompt_git
+  )
+fi
 
 typeset -g SIMPALT_SMALL='ON'
 
@@ -46,10 +48,10 @@ prompt_segment() {
   [[ -n $2 ]] && fg="%F{$2}" || fg="%f"
 
   if [[ $CURRENT_BG == 'NONE' ]]; then
-    print -n "%{$bg%}%{$fg%}"
+    print -n "%{$bg%}"
   else
     if [[ $1 != $CURRENT_BG ]]; then
-      print -n "%{$bg%F{$CURRENT_BG}%}$SEGMENT_SEPARATOR%{$fg%}"
+      print -n "%{$bg%F{$CURRENT_BG}%}$SEGMENT_SEPARATOR"
     else
       if [[ -z $PENDING_FLAG ]]; then
         print -n '\b'
@@ -58,6 +60,8 @@ prompt_segment() {
       fi
     fi
   fi
+
+  print -n "%{$fg%}"
 
   CURRENT_BG=$1
 
