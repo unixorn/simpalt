@@ -44,29 +44,20 @@ prompt_segment() {
   [[ -n $1 ]] && bg="%K{$1}" || bg="%k"
   [[ -n $2 ]] && fg="%F{$2}" || fg="%f"
   if [[ $CURRENT_BG != 'NONE' && $1 != $CURRENT_BG ]]; then
-    [[ "${PADDED}" == "TRUE" ]] && [[ "${4}" != "stick" ]] && print -n " "
-    print -n "%{$bg%F{$CURRENT_BG}%}$SEGMENT_SEPARATOR%{$fg%}"
-    PADDED='FALSE'
+    print -n " %{$bg%F{$CURRENT_BG}%}$SEGMENT_SEPARATOR%{$fg%}"
   else
     print -n "%{$bg%}%{$fg%}"
   fi
   CURRENT_BG=$1
-  if [[ -n $3 ]];then
-    if [[ "${4}" != "stick" ]]; then
-      print -n " "
-      PADDED='TRUE'
-    else
-      PADDED='FALSE'
-    fi
-    print -n $3
+  if [[ -n $3 ]]; then
+    print -n " $3"
   fi
 }
 
 # End the prompt, closing any open segments
 prompt_end() {
   if [[ -n $CURRENT_BG ]]; then
-    [[ "${PADDED}" == "TRUE" ]] && print -n " "
-    print -n "%{%k%F{$CURRENT_BG}%}$SEGMENT_SEPARATOR"
+    print -n " %{%k%F{$CURRENT_BG}%}$SEGMENT_SEPARATOR"
   else
     print -n "%{%k%}"
   fi
@@ -95,8 +86,6 @@ prompt_git() {
   }
   ref="$vcs_info_msg_0_"
 
-  local padding='stick'
-
   if [ $SIMPALT_SMALL ]; then
     if [ -z "$ref" ]; then
       color=blue
@@ -113,10 +102,9 @@ prompt_git() {
         ref=""
       else
         ref="${ref/*\//}"
-        unset padding
       fi
     fi
-    prompt_segment "${color}" $PRIMARY_FG "$ref" $padding
+    prompt_segment $color $PRIMARY_FG "$ref"
   else
     if [[ -n "$ref" ]]; then
       if is_dirty; then
@@ -182,7 +170,6 @@ prompt_virtualenv() {
 prompt_simpalt_main() {
   RETVAL=$?
   CURRENT_BG='NONE'
-  PADDED='FALSE'
   for prompt_segment in "${SIMPALT_PROMPT_SEGMENTS[@]}"; do
     [[ -n $prompt_segment ]] && $prompt_segment
   done
