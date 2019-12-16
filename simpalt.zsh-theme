@@ -33,7 +33,7 @@ PLUSMINUS="\u00b1"
 BRANCH="\ue0a0"
 DETACHED="\u27a6"
 CROSS="\u2718"
-LIGHTNING="\u26a1"
+SUPER="\u26a1"
 GEAR="\u2699"
 
 # Begin a segment
@@ -115,10 +115,10 @@ prompt_git() {
         color=green
         ref="${ref}"
       fi
-      if [[ "${ref/.../}" == "$ref" ]]; then
-        ref="$BRANCH $ref"
-      else
+      if ! $(git symbolic-ref HEAD &> /dev/null); then
         ref="$DETACHED ${ref/.../}"
+      else
+        ref="$BRANCH $ref"
       fi
       prompt_segment $color $PRIMARY_FG "${ref}"
     fi
@@ -153,8 +153,8 @@ prompt_status() {
   local symbols
   symbols=()
   [[ $RETVAL -ne 0 ]] && symbols+="%{%F{red}%}$CROSS"
-  [[ $UID -eq 0 ]] && symbols+="%{%F{yellow}%}$LIGHTNING"
-  [[ $(jobs -l | wc -l) -gt 0 ]] && symbols+="%{%F{cyan}%}$GEAR"
+  [[ $UID -eq 0 ]] && symbols+="%{%F{yellow}%}$SUPER"
+  [[ $(jobs -l | wc -l) -gt 0 ]] && symbols+="%{%F{blue}%}$GEAR"
 
   [[ -n "$symbols" ]] && prompt_segment $PRIMARY_FG default "$symbols"
 }
