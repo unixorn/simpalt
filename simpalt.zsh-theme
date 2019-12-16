@@ -96,7 +96,9 @@ prompt_git() {
   ref="$vcs_info_msg_0_"
 
   if [ $SIMPALT_SMALL ]; then
-    if [[ -n "$ref" ]]; then
+    if [[ $ref ]]; then
+      color=blue
+    else
       if ! $(git symbolic-ref HEAD &> /dev/null); then
         color=red
       elif is_dirty; then
@@ -106,19 +108,16 @@ prompt_git() {
       fi
 
       if [[ "${ref}" == "master" ]]; then
-        prompt_segment $PRIMARY_FG default "" pad
-        prompt_segment "${color}" default "" stick
+        ref=""
       elif [[ "${ref}" == "develop" ]] || [[ "${ref}" == "development" ]]; then
-        prompt_segment $PRIMARY_FG default "$BRANCH" pad
-        prompt_segment "${color}" default "" stick
+        ref=" $BRANCH "
       else
-        prompt_segment "${color}" $PRIMARY_FG
-        print -n " ${ref/*\//}"
-        PADDED='TRUE'
+        ref=" ${ref/*\//} "
       fi
-    else
-      prompt_segment blue default "" stick
     fi
+
+    prompt_segment "${color}" $PRIMARY_FG "$ref"
+    PADDED='FALSE'
   else
     if [[ -n "$ref" ]]; then
       if is_dirty; then
