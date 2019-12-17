@@ -46,7 +46,7 @@ prompt_segment() {
       fi
       print -n "%{$bg%F{$__SIMPALT_CURRENT_BG}%}"
     elif [[ -n $__SIMPALT_PENDING_FLAG || -z $3 ]]; then
-      print -n "%F{$PRIMARY_FG}"
+      print -n "%{$fg%}"
     fi
   fi
 
