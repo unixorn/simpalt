@@ -24,20 +24,9 @@ fi
 
 typeset -g SIMPALT_SMALL='ON'
 
-CURRENT_BG='NONE'
 if [[ -z "$PRIMARY_FG" ]]; then
   PRIMARY_FG=black
 fi
-
-# Characters
-SEGMENT_SEPARATOR="\ue0b0"
-FLAG_SEPARATOR="\ue0b1"
-PLUSMINUS="\u00b1"
-BRANCH="\ue0a0"
-DETACHED="\u27a6"
-CROSS="\u2718"
-SUPER="\u26a1"
-GEAR="\u2699"
 
 # Begin a segment
 # Takes two arguments, background and foreground. Both can be omitted,
@@ -48,41 +37,43 @@ prompt_segment() {
   [[ -n $1 ]] && bg="%K{$1}" || bg="%k"
   [[ -n $2 ]] && fg="%F{$2}" || fg="%f"
 
-  if [[ $CURRENT_BG == 'NONE' ]]; then
+  if [[ $__SIMPALT_CURRENT_BG == 'NONE' ]]; then
     print -n "%{$bg%}"
   else
-    if [[ $1 != $CURRENT_BG ]]; then
-      print -n "%{$bg%F{$CURRENT_BG}%}$SEGMENT_SEPARATOR"
-    else
-      if [[ -z $PENDING_FLAG && -n $3 ]]; then
-        print -n '\b'
-      else
-        print -n "%F{%k%}$FLAG_SEPARATOR"
+    if [[ $1 != $__SIMPALT_CURRENT_BG ]]; then
+      if [[ -z $__SIMPALT_PENDING_FLAG ]]; then
+        print -n ' '
       fi
+      print -n "%{$bg%F{$__SIMPALT_CURRENT_BG}%}"
+    elif [[ -n $__SIMPALT_PENDING_FLAG || -z $3 ]]; then
+      print -n "%F{%k%}"
     fi
   fi
 
   print -n "%{$fg%}"
 
-  CURRENT_BG=$1
+  __SIMPALT_CURRENT_BG=$1
 
   if [[ -n $3 ]]; then
-    print -n " $3 "
-    unset PENDING_FLAG
+    print -n " $3"
+    unset __SIMPALT_PENDING_FLAG
   else
-    PENDING_FLAG=1
+    __SIMPALT_PENDING_FLAG=1
   fi
 }
 
 # End the prompt, closing any open segments
 prompt_end() {
-  if [[ -n $CURRENT_BG ]]; then
-    print -n "%{%k%F{$CURRENT_BG}%}$SEGMENT_SEPARATOR"
+  if [[ -z $__SIMPALT_PENDING_FLAG ]]; then
+    print -n ' '
+  fi
+
+  if [[ -n $__SIMPALT_CURRENT_BG ]]; then
+    print -n "%{%k%F{$__SIMPALT_CURRENT_BG}%}"
   else
     print -n "%{%k%}"
   fi
   print -n "%{%f%}"
-  CURRENT_BG=''
 }
 
 ### Prompt components
@@ -129,16 +120,18 @@ prompt_git() {
     if [[ -n "$ref" ]]; then
       if is_dirty; then
         color=yellow
-        ref="$ref $PLUSMINUS"
+        ref="$ref ±"
       else
         color=green
         ref="$ref"
       fi
+
       if ! $(git symbolic-ref HEAD &> /dev/null); then
-        ref="$DETACHED ${ref/.../}"
+        ref="➦ ${ref/.../}"
       else
-        ref="$BRANCH $ref"
+        ref=" $ref"
       fi
+
       prompt_segment $color $PRIMARY_FG "$ref"
     fi
   fi
@@ -171,9 +164,9 @@ prompt_dir() {
 prompt_status() {
   local symbols
   symbols=()
-  [[ $RETVAL -ne 0 ]] && symbols+="%{%F{red}%}$CROSS"
-  [[ $UID -eq 0 ]] && symbols+="%{%F{yellow}%}$SUPER"
-  [[ $(jobs -l | wc -l) -gt 0 ]] && symbols+="%{%F{blue}%}$GEAR"
+  [[ $RETVAL -ne 0 ]] && symbols+="%{%F{red}%}✘"
+  [[ $UID -eq 0 ]] && symbols+="%{%F{yellow}%}☢"
+  [[ $(jobs -l | wc -l) -gt 0 ]] && symbols+="%{%F{blue}%}⚙"
 
   [[ -n "$symbols" ]] && prompt_segment $PRIMARY_FG default "$symbols"
 }
@@ -181,18 +174,23 @@ prompt_status() {
 # Display current virtual environment
 prompt_virtualenv() {
   if [[ -n $VIRTUAL_ENV ]]; then
-    color=cyan
-    prompt_segment $color $PRIMARY_FG "$(basename $VIRTUAL_ENV)"
+    prompt_segment cyan $PRIMARY_FG "$(basename $VIRTUAL_ENV)"
   fi
 }
 
 ## Main prompt
 prompt_simpalt_main() {
   RETVAL=$?
-  CURRENT_BG='NONE'
+  __SIMPALT_CURRENT_BG='NONE'
+  unset __SIMPALT_PENDING_FLAG
+
   for prompt_segment in "${SIMPALT_PROMPT_SEGMENTS[@]}"; do
     [[ -n $prompt_segment ]] && $prompt_segment
   done
+
+  unset __SIMPALT_CURRENT_BG
+  unset __SIMPALT_PENDING_FLAG
+
   prompt_end
 }
 
