@@ -54,7 +54,7 @@ prompt_segment() {
     if [[ $1 != $CURRENT_BG ]]; then
       print -n "%{$bg%F{$CURRENT_BG}%}$SEGMENT_SEPARATOR"
     else
-      if [[ -z $PENDING_FLAG ]]; then
+      if [[ -z $PENDING_FLAG && -n $3 ]]; then
         print -n '\b'
       else
         print -n "%F{%k%}$FLAG_SEPARATOR"
