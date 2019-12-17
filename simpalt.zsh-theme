@@ -26,7 +26,7 @@ typeset -g SIMPALT_SMALL='ON'
 
 CURRENT_BG='NONE'
 if [[ -z "$PRIMARY_FG" ]]; then
-	PRIMARY_FG=black
+  PRIMARY_FG=black
 fi
 
 # Characters
@@ -93,7 +93,7 @@ prompt_context() {
   local context user=`whoami`
 
   if [[ "$user" != "$DEFAULT_USER" || -n "$SSH_CONNECTION" ]]; then
-    [[ -n "${COMPUTER_SYMBOL}" ]] && context="${COMPUTER_SYMBOL}" || context="$user@%m"
+    [[ -n "$COMPUTER_SYMBOL" ]] && context="$COMPUTER_SYMBOL" || context="$user@%m"
     prompt_segment $PRIMARY_FG default "%(!.%{%F{yellow}%}.)$context"
   fi
 }
@@ -118,7 +118,7 @@ prompt_git() {
         color=green
       fi
 
-      if [[ "${ref}" == "master" ]] || [[ "${ref}" == "develop" ]] || [[ "${ref}" == "development" ]]; then
+      if [[ "$color" == "red" || "$ref" == "master" || "$ref" == "develop" || "$ref" == "development" ]]; then
         ref=""
       else
         ref="${ref/*\//}"
@@ -129,17 +129,17 @@ prompt_git() {
     if [[ -n "$ref" ]]; then
       if is_dirty; then
         color=yellow
-        ref="${ref} $PLUSMINUS"
+        ref="$ref $PLUSMINUS"
       else
         color=green
-        ref="${ref}"
+        ref="$ref"
       fi
       if ! $(git symbolic-ref HEAD &> /dev/null); then
         ref="$DETACHED ${ref/.../}"
       else
         ref="$BRANCH $ref"
       fi
-      prompt_segment $color $PRIMARY_FG "${ref}"
+      prompt_segment $color $PRIMARY_FG "$ref"
     fi
   fi
 }
@@ -147,7 +147,7 @@ prompt_git() {
 # AWS: current aws-vault session
 prompt_aws() {
   if [ $AWS_VAULT ]; then
-    [ $SIMPALT_SMALL ] && prompt_segment black default "%{%F{magenta}%}" || prompt_segment magenta $PRIMARY_FG " $AWS_VAULT"
+    [ $SIMPALT_SMALL ] && prompt_segment black magenta "" || prompt_segment magenta $PRIMARY_FG " $AWS_VAULT"
   fi
 }
 
