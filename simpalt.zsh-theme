@@ -46,7 +46,7 @@ prompt_segment() {
       fi
       print -n "%{$bg%F{$__SIMPALT_CURRENT_BG}%}"
     elif [[ -n $__SIMPALT_PENDING_FLAG || -z $3 ]]; then
-      print -n "%F{%k%}"
+      print -n "%F{$PRIMARY_FG}"
     fi
   fi
 
@@ -187,11 +187,10 @@ prompt_simpalt_main() {
   for prompt_segment in "${SIMPALT_PROMPT_SEGMENTS[@]}"; do
     [[ -n $prompt_segment ]] && $prompt_segment
   done
+  prompt_end
 
   unset __SIMPALT_CURRENT_BG
   unset __SIMPALT_PENDING_FLAG
-
-  prompt_end
 }
 
 prompt_simpalt_precmd() {
