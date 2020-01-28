@@ -22,6 +22,13 @@ if [[ -z $SIMPALT_PROMPT_SEGMENTS ]]; then
   )
 fi
 
+if [[ -z $SIMPALT_MAIN_BRANCHES ]]; then
+  typeset -aHg SIMPALT_MAIN_BRANCHES=(
+      master
+      development
+  )
+fi
+
 typeset -g SIMPALT_SMALL='ON'
 
 if [[ -z "$PRIMARY_FG" ]]; then
@@ -109,7 +116,7 @@ prompt_git() {
         color=green
       fi
 
-      if [[ "$color" == "red" || "$ref" == "master" || "$ref" == "develop" || "$ref" == "development" ]]; then
+      if [[ "$color" == "red" ]] || [[ $SIMPALT_MAIN_BRANCHES =~ (^|[[:space:]])$ref($|[[:space:]]) ]]; then
         ref=""
       else
         ref="${ref/*\//}"
